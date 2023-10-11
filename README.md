@@ -1,6 +1,6 @@
 # Stream PDF 🇫🇷
 
-Ce projet est un script Python conçu pour analyser et extraire des données à partir de fichiers PDF, en mettant l'accent sur le digital forensic, la stéganographie et les défis CTF (Capture The Flag). J'ai développé ce script moi-même dans le but de résoudre un challenge RootMe → [PDF Embedded](https://www.root-me.org/en/Challenges/Steganography/PDF-Embedded/).
+Ce projet est un script Python conçu pour analyser et extraire des données à partir de fichiers PDF, en mettant l'accent sur le digital forensic, la stéganographie et les défis CTF (Capture The Flag). J'ai développé ce script moi-même dans le but de résoudre un challenge RootMe [PDF-Embedded](https://www.root-me.org/fr/Challenges/Steganographie/PDF-Embedded).
 
 Les principales caractéristiques du script incluent :
 
@@ -17,6 +17,7 @@ Ce projet a été développé pour répondre aux besoins de ceux qui travaillent
 English version [here](EN/README.md) 🇬🇧
 
 ## Démonstration
+![](fr_demo.gif)
 
 ## Installation
 
