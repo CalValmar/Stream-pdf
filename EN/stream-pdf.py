@@ -9,14 +9,14 @@ default_pdf_file = 'bac2004.pdf'  # Change to the PDF file name you want to anal
 
 def print_banner():
     banner = """    ______                       ___  ___  ____
-   / __/ /________ ___ ___ _    / _ / _ / __/
-  _\ \/ __/ __/ -_) _ `/  ' \  / ___/ // / _/
+   / __/ /________ ___ ___ _    / _ \/ _ \/ __/
+  _\ \/ __/ __/ -_) _ `/  ' \  / ___/ // / _/  
  /___/\__/_/  \__/\_,_/_/_/_/ /_/  /____/_/  """
-
+    
     info = """
-  [+] Github: https://github.com/CalValmar
-  [+] Author: Valmar
-  [+] Version: 1.0 """
+  [+] Github : https://github.com/CalValmar
+  [+] Auteur : Valmar
+  [+] Version : 1.0 """
 
     print(Fore.GREEN + Style.BRIGHT + banner)
     print(Fore.LIGHTYELLOW_EX + Style.BRIGHT + info)
