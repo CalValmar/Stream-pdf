@@ -1,11 +1,11 @@
 from colorama import Fore, Style
-import base64
-import zlib
-import os
-import re
+import base64 
+import zlib 
+import os 
+import re 
 
 # Fichier PDF par défaut :
-default_pdf_file = 'bac2004.pdf' # A modifier par le nom du fichier PDF à analyser
+default_pdf_file = 'bac2004.pdf' # A modifier par le nom du fichier PDF à analyser pour faciliter l'utilisation du script (appuyer sur Entrée pour utiliser le fichier par défaut)
 
 def print_banner():
     banner = """    ______                       ___  ___  ____
@@ -56,7 +56,7 @@ def object_stream_list(pdf_file):
         print(Fore.LIGHTGREEN_EX + Style.BRIGHT + f"\n [+] Liste des objets / streams enregistrée dans" + Fore.LIGHTYELLOW_EX + Style.BRIGHT + f" objects_streams_list/{pdf_file}_list.txt")
 
 
-# Fonction pour extraire les objets Stream
+# Fonction pour extraire les objets / streams
 def extract_object_stream(pdf_file, object_stream_number, output_file):
     try:
         # Ouvrir le fichier PDF en mode binaire
@@ -87,7 +87,7 @@ def extract_object_stream(pdf_file, object_stream_number, output_file):
         print(Fore.LIGHTRED_EX + Style.BRIGHT + f"\n [-] Une erreur s'est produite : {str(e)}")
 
 
-# Fonction pour extraire les objets Stream FlateDecode
+# Fonction pour extraire le FlateDecode
 def extract_flatedecode(pdf_file, output_file):
     # Récupérer les objets Stream FlateDecode
     stream = re.compile(rb'.*?FlateDecode.*?stream(.*?)endstream', re.S) 
@@ -110,7 +110,7 @@ def extract_flatedecode(pdf_file, output_file):
             print(Fore.LIGHTRED_EX + Style.BRIGHT + f"\n [-] Une erreur s'est produite : {str(e)}")
         
 
-# Fonction pour décoder le contenu d'un Flatecode en base64
+# Fonction pour décoder le contenu du Flatecode en base64
 def decode_flatedecode(pdf_file, outpout_file):
     try:        
         # Décoder le contenu en base64
@@ -291,4 +291,3 @@ if __name__ == '__main__':
     if not os.path.exists('generated_files'):
         os.makedirs('generated_files')
     main()
-    
