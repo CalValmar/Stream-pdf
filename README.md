@@ -21,7 +21,7 @@ English version [here](EN/README.md) 🇬🇧
 
 ## Installation
 
-Vous pouvez installer le projet en clonant le dépôt en exécutant la commande suivante :
+Vous pouvez installer le projet en exécutant la commande suivante :
     
 ```
 git clone https://github.com/CalValmar/Stream-pdf.git
