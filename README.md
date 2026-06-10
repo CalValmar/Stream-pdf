@@ -30,6 +30,7 @@ N'oubliez pas d'installer les dépendances :
 ```
 pip install -r requirements.txt
 ```
+Si `colorama` n'est pas installé, le script fonctionne quand même sans couleurs.
 
 ## Utilisation
 
@@ -39,13 +40,13 @@ Pour utiliser le script, exécutez la commande suivante :
 python3 stream-pdf.py
 ```
 
-⚠️  Avant d'exécuter le script, vous devez déplacer le fichier PDF que vous souhaitez analyser dans le même répertoire que le script. Assurez-vous également de modifier la variable 'default_pdf_file' en fonction du nom de votre fichier PDF pour faciliter l'exécution du script.
+⚠️  Avant d'exécuter le script, placez le fichier PDF à analyser dans le dossier du script. Vous pouvez aussi adapter la variable `default_pdf_file` si vous voulez changer le fichier utilisé par défaut.
     
 ```
 default_pdf_file = 'your_pdf_file.pdf'
 ```
 
-⚠️  Le document 'bac2004.pdf' est un exemple de fichier PDF qui peut être utilisé pour tester le script. Vous pouvez le supprimer si vous le souhaitez.
+⚠️  Le document `bac2004.pdf` est un exemple de fichier PDF fourni avec le projet pour tester le script. Vous pouvez le supprimer si vous le souhaitez.
 
 ## Licence
 

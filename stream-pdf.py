@@ -1,14 +1,47 @@
-from colorama import Fore, Style
+try:
+    from colorama import Fore, Style 
+except ImportError:
+    class _ColorFallback:
+        def __getattr__(self, _name):
+            return ''
+
+    Fore = Style = _ColorFallback()
 import base64 
 import zlib 
 import os 
 import re 
+from pathlib import Path
 
 # Fichier PDF par défaut :
 default_pdf_file = 'bac2004.pdf' # A modifier par le nom du fichier PDF à analyser pour faciliter l'utilisation du script (appuyer sur Entrée pour utiliser le fichier par défaut)
 
+
+def resolve_pdf_path(pdf_file):
+    script_dir = Path(__file__).resolve().parent
+    input_path = Path(pdf_file).expanduser()
+    pdf_path = input_path if input_path.is_absolute() else script_dir / input_path
+    pdf_path = pdf_path.resolve()
+
+    try:
+        pdf_path.relative_to(script_dir)
+    except ValueError:
+        print(Fore.LIGHTRED_EX + Style.BRIGHT + "\n [-] Chemin invalide !")
+        return None
+
+    return pdf_path
+
+
+def read_binary_file(file_path):
+    with open(file_path, 'rb') as file_handle:
+        return file_handle.read()
+
+
+def read_text_file(file_path):
+    with open(file_path, 'r') as file_handle:
+        return file_handle.read()
+
 def print_banner():
-    banner = """    ______                       ___  ___  ____
+    banner = r"""    ______                       ___  ___  ____
    / __/ /________ ___ ___ _    / _ \/ _ \/ __/
   _\ \/ __/ __/ -_) _ `/  ' \  / ___/ // / _/  
  /___/\__/_/  \__/\_,_/_/_/_/ /_/  /____/_/  """
@@ -34,34 +67,35 @@ def remove_files():
  
 # Fonction pour afficher la liste des objets / streams
 def object_stream_list(pdf_file):
-    with open(pdf_file, 'rb') as f:
-        content = f.read()
-        
+    content = read_binary_file(pdf_file)
+    pdf_name = Path(pdf_file).name
+
+    object_streams = content.split(b'endobj')
     list_obj = []
-    for i, obj in enumerate(content.split(b'endobj')):
+    for i, obj in enumerate(object_streams):
         if b'obj' in obj:
             list_obj.append(i + 1)
     print(Fore.LIGHTCYAN_EX + Style.BRIGHT + f"\n Liste des objets dans '{pdf_file}' :" + Fore.LIGHTYELLOW_EX + Style.BRIGHT + f"\n {list_obj}")
 
     list_stream = []
-    for i, obj in enumerate(content.split(b'endobj')):
+    for i, obj in enumerate(object_streams):
         if b'stream' in obj:
             list_stream.append(i + 1)
     print(Fore.LIGHTCYAN_EX + Style.BRIGHT + f"\n Liste des stream dans '{pdf_file}' :" + Fore.LIGHTYELLOW_EX + Style.BRIGHT + f"\n {list_stream}")
     
     # Enregistrer la liste des objets / streams dans un le fichier '/objects_streams_list/{pdf_file}_list.txt'
-    if not os.path.exists(f"objects_streams_list/{pdf_file}_list.txt"):
-        with open(os.path.join('objects_streams_list', f'{pdf_file}_list.txt'), 'w') as f:
-            f.write(f"Liste des objets dans '{pdf_file}' :\n {list_obj}\n\nListe des stream dans '{pdf_file}' :\n {list_stream}")
-        print(Fore.LIGHTGREEN_EX + Style.BRIGHT + f"\n [+] Liste des objets / streams enregistrée dans" + Fore.LIGHTYELLOW_EX + Style.BRIGHT + f" objects_streams_list/{pdf_file}_list.txt")
+    output_path = os.path.join('objects_streams_list', f'{pdf_name}_list.txt')
+    if not os.path.exists(output_path):
+        with open(output_path, 'w') as f:
+            f.write(f"Liste des objets dans '{pdf_name}' :\n {list_obj}\n\nListe des stream dans '{pdf_name}' :\n {list_stream}")
+        print(Fore.LIGHTGREEN_EX + Style.BRIGHT + f"\n [+] Liste des objets / streams enregistrée dans" + Fore.LIGHTYELLOW_EX + Style.BRIGHT + f" {output_path}")
 
 
 # Fonction pour extraire les objets / streams
 def extract_object_stream(pdf_file, object_stream_number, output_file):
     try:
         # Ouvrir le fichier PDF en mode binaire
-        with open(pdf_file, 'rb') as f:
-            content = f.read()
+        content = read_binary_file(pdf_file)
         
         # Séparer les objets Stream
         object_streams = content.split(b'endobj')
@@ -93,7 +127,7 @@ def extract_flatedecode(pdf_file, output_file):
     stream = re.compile(rb'.*?FlateDecode.*?stream(.*?)endstream', re.S) 
     
     # Extraire les objets Stream FlateDecode
-    for i, s in enumerate(stream.findall(open(pdf_file, 'rb').read())):
+    for i, s in enumerate(stream.findall(read_binary_file(pdf_file))):
         s = s.strip(b'\r\n')
         try:
             with open(os.path.join('generated_files', output_file), 'wb') as f:
@@ -114,7 +148,7 @@ def extract_flatedecode(pdf_file, output_file):
 def decode_flatedecode(pdf_file, outpout_file):
     try:        
         # Décoder le contenu en base64
-        decoded_content = base64.b64decode(open(pdf_file, 'rb').read())
+        decoded_content = base64.b64decode(read_binary_file(pdf_file))
         
         with open(os.path.join('generated_files', outpout_file), 'wb') as out_f:
             out_f.write(decoded_content)
@@ -147,10 +181,16 @@ def main():
             pdf_file = input(Fore.GREEN + " Entrez le nom du fichier PDF à analyser : ")
             if pdf_file == '':
                 pdf_file = default_pdf_file
+
+            pdf_path = resolve_pdf_path(pdf_file)
+            if pdf_path is None:
+                choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
+                clear_screen(), print_banner()
+                continue
             
             if not os.path.exists("objects_streams_list"):
                 os.makedirs("objects_streams_list")
-            clear_screen(), object_stream_list(pdf_file)
+            clear_screen(), object_stream_list(str(pdf_path))
         
             choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
             if choice == '':
@@ -164,7 +204,14 @@ def main():
             pdf_file = input(Fore.GREEN + " Entrez le nom du fichier PDF à analyser : ")
             if pdf_file == '':
                 pdf_file = default_pdf_file
-            extract_object_stream(pdf_file, -1, os.path.join('generated_files', 'all_objects.txt'))
+
+            pdf_path = resolve_pdf_path(pdf_file)
+            if pdf_path is None:
+                choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
+                clear_screen(), print_banner()
+                continue
+
+            extract_object_stream(str(pdf_path), -1, os.path.join('generated_files', 'all_objects.txt'))
             
             choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
             if choice == '':
@@ -178,6 +225,13 @@ def main():
             pdf_file = input(Fore.GREEN + " Entrez le nom du fichier PDF à analyser : ")
             if pdf_file == '':
                 pdf_file = default_pdf_file
+
+            pdf_path = resolve_pdf_path(pdf_file)
+            if pdf_path is None:
+                choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
+                clear_screen(), print_banner()
+                continue
+
             object_stream_number = input(Fore.GREEN + " Entrez le numéro de l'objet / stream à extraire : ")
             try:
                 object_stream_number = int(object_stream_number)
@@ -191,13 +245,13 @@ def main():
                 choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
                 clear_screen(), print_banner()
                 continue
-            if object_stream_number > len(open(pdf_file, 'rb').read().split(b'endobj')):
+            if object_stream_number > len(read_binary_file(pdf_path).split(b'endobj')):
                 print(Fore.LIGHTRED_EX + Style.BRIGHT + "\n [-] Le numéro de l'objet / stream est supérieur au nombre d'objets / stream dans ce PDF.")
                 choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
                 clear_screen(), print_banner()
                 continue
             try:
-                extract_object_stream(pdf_file, object_stream_number, os.path.join('generated_files', f'object_stream_{object_stream_number}.txt'))
+                extract_object_stream(str(pdf_path), object_stream_number, os.path.join('generated_files', f'object_stream_{object_stream_number}.txt'))
                 # Demander à l'utilisateur s'il veut visualiser le contenu de l'objet Stream
                 while True:
                     print(Fore.LIGHTYELLOW_EX + Style.BRIGHT + "\n Voulez-vous visualiser le contenu de l'objet / stream ?")
@@ -206,7 +260,8 @@ def main():
                     choice = input(Fore.GREEN + "\n Option : ")
                     if choice == '1':
                         try: 
-                            print(Fore.LIGHTYELLOW_EX + Style.BRIGHT + f"\n\n Contenu de l'objet / stream {object_stream_number} :" + Fore.LIGHTCYAN_EX + Style.BRIGHT + "\n" + "-" * 80 + Fore.WHITE + Style.BRIGHT + open(os.path.join('generated_files', f'object_stream_{object_stream_number}.txt'), 'r').read() + Fore.LIGHTCYAN_EX + Style.BRIGHT + "\n" + "-" * 80)
+                            object_stream_content = read_text_file(os.path.join('generated_files', f'object_stream_{object_stream_number}.txt'))
+                            print(Fore.LIGHTYELLOW_EX + Style.BRIGHT + f"\n\n Contenu de l'objet / stream {object_stream_number} :" + Fore.LIGHTCYAN_EX + Style.BRIGHT + "\n" + "-" * 80 + Fore.WHITE + Style.BRIGHT + object_stream_content + Fore.LIGHTCYAN_EX + Style.BRIGHT + "\n" + "-" * 80)
                             choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
                             clear_screen(), print_banner()
                             break
@@ -243,7 +298,14 @@ def main():
             pdf_file = input(Fore.GREEN + " Entrez le nom du fichier PDF à analyser : ")
             if pdf_file == '':
                 pdf_file = default_pdf_file
-            extract_flatedecode(pdf_file, 'raw_flatedecode.txt')
+
+            pdf_path = resolve_pdf_path(pdf_file)
+            if pdf_path is None:
+                choice = input(Fore.LIGHTBLACK_EX + "\n Appuyez sur Entrée pour continuer...")
+                clear_screen(), print_banner()
+                continue
+
+            extract_flatedecode(str(pdf_path), 'raw_flatedecode.txt')
                
             # Demander à l'utilisateur s'il veut décoder le contenu du FlateDecode
             while True:

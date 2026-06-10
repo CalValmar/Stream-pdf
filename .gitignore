@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Generated files from this project
+generated_files/
+objects_streams_list/
+
+# Logs and databases
+*.log
+logs/
+
+# Editor configs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# pip cache / packaging
+pip-wheel-metadata/
+*.egg
+.pytest_cache/
+
+# Environment files
+.env
+.env.*
+
+# Bytecode
+*.pyc
